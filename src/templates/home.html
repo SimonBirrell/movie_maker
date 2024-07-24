@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>Welcome to Movie Maker</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>Movie Projects</h1>
+    {% for movie_project in movie_projects %}
+        <h2><a href="{{ url_for('ui_read_movie_project', movie_project_id=movie_project.id)}}">{{ movie_project.title }}</a></h2>
+        <p>{{ movie_project.description }}</p>
+    {% endfor %}
+</body>
+</html>

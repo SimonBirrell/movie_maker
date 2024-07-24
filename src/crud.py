@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import schemas, models
 
 def get_movie_project(db: Session, movie_project_id: int):
     return db.query(models.MovieProject).filter(models.MovieProject.id == movie_project_id).first()
