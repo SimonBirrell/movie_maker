@@ -1,0 +1,15 @@
+{% extends 'layouts/application.html' %}
+{% block title %}Movie Projects{% endblock %}
+
+{% block breadcrumb %}
+    <a href="/ui">Movie Maker</a> &gt; Movie Projects</a>
+{% endblock %}
+
+{% block content %}
+
+{% for movie_project in movie_projects %}
+<h2><a href="{{ url_for('ui_read_movie_project', movie_project_id=movie_project.id)}}">{{ movie_project.title }}</a></h2>
+<p>{{ movie_project.description }}</p>
+{% endfor %}
+
+{% endblock %}

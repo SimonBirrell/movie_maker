@@ -1,10 +1,17 @@
-<html>
-<head>
-    <title>{{ movie_project.title }} | Movie Maker</title>
-    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
-</head>
-<body>
-    <h1>{{ movie_project.title }}</h1>
-    <p>{{ movie_project.description }}</p>
-</body>
-</html>
+{% extends 'layouts/application.html' %}
+{% block title %}{{ movie_project.title }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="/ui">Movie Maker</a> &gt; <a href="/ui/movie_projects">Movie Projects</a> &gt; {{ movie_project.title }}
+{% endblock %}
+
+{% block content %}
+
+<h1>{{ movie_project.title }}</h1>
+<p>{{ movie_project.genre }}</p>
+<p>{{ movie_project.description }}</p>
+<p>{{ movie_project.outline }}</p>
+
+<a href="/ui/movie_projects/{{ movie_project.id }}/edit">Edit</a>
+
+{% endblock %}

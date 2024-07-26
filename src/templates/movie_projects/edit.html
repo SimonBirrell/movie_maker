@@ -1,0 +1,22 @@
+{% extends 'layouts/application.html' %}
+{% block title %}Edit {{ movie_project.title }}{% endblock %}
+
+{% block content %}
+
+<form action="/ui/movie_projects/{{ movie_project.id }}" method="post">
+    <label for="title">Title
+        <input type="text" id="title" name="title" value="{{ movie_project.title }}">
+    </label>  
+    <label for="genre">Genre
+        <input type="text" id="genre" name="genre" value="{{ movie_project.genre }}">
+    </label>  
+    <label for="description">Description
+        <input type="textarea" id="description" name="description" value="{{ movie_project.description }}">
+    </label>   
+    <label for="outline">Outline
+        <input type="textarea" id="outline" name="outline" value="{{ movie_project.outline }}">
+    </label>    
+    <button>Save</button>
+</form>
+
+{% endblock %}

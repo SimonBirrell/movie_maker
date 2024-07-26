@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <title>{% block title %}{% endblock %} | Movie Maker</title>
+    {% endblock %}
+</head>
+<body>
+    <div id="header" style="padding:8px;">
+        {% block header %}
+        <div>{% block breadcrumb %}{% endblock %}</div>
+        {% endblock %}
+    <div id="content" style="padding:8px;">{% block content %}{% endblock %}</div>
+    <div id="footer" style="padding:8px;">
+        {% block footer %}
+        &copy; Copyright 2024 by <a href="/">Someone.</a>.
+        {% endblock %}
+    </div>
+</body>
+</html>
