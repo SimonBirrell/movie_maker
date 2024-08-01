@@ -8,7 +8,11 @@
         <input type="text" id="title" name="title" value="{{ movie_project.title }}">
     </label>  
     <label for="genre">Genre
-        <input type="text" id="genre" name="genre" value="{{ movie_project.genre }}">
+        <select name="genre" id="genre">
+            {% for genre in movie_project.genre_values() %}
+                <option value="{{ genre }}" {% if genre == movie_project.genre %}selected{% endif %}>{{ genre }}</option>
+            {% endfor %}
+        </select>
     </label>  
     <label for="description">Description
         <input type="textarea" id="description" name="description" value="{{ movie_project.description }}">

@@ -7,11 +7,20 @@
 
 {% block content %}
 
+{% if ok_message %}
+<div style="background-color:green; color:white;padding:4px;">{{ ok_message }}</div>
+{% endif %}
+
 <h1>{{ movie_project.title }}</h1>
 <p>{{ movie_project.genre }}</p>
 <p>{{ movie_project.description }}</p>
 <p>{{ movie_project.outline }}</p>
 
+<a href="/ui/movie_projects/{{ movie_project.id }}">Refresh</a>
 <a href="/ui/movie_projects/{{ movie_project.id }}/edit">Edit</a>
+
+<form action="/ui/movie_projects/{{ movie_project.id }}/generate_outline" method="post">
+    <input type="submit" value="Generate Outline">
+</form>
 
 {% endblock %}
