@@ -1,3 +1,5 @@
+import asyncio
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
@@ -25,13 +27,18 @@ class MovieProject(Base):
         me.outline = "Generating outline..."
         db.commit()
 
-        await self.studio_exec_start()
+        for i in range(1):
+            await self.studio_exec_start()
+            await asyncio.sleep(5)
 
-        me.outline = await self.first_draft_outline(me.title, me.outline)
+        me.outline = await self.first_draft_outline(me.title, me.genre)
+        db.commit()
         
         print("Critiquing outline")
-        # critique = await self.critique_outline(me.title, me.genre, me.outline)
-        # print(critique)
+        critique = await self.critique_outline(me.title, me.genre, me.outline)
+        print(critique)
+
+        me.outline = await self.second_draft_outline(me.title, me.genre, me.outline, critique)
 
         db.commit()
         return me
@@ -40,12 +47,15 @@ class MovieProject(Base):
         await team_contribution_queue.add_contribution_to_queue(self.id, "Studio Exec", "Get cracking!!!")
     
     async def first_draft_outline(self, title, genre):
-        return await self.generate_contribution("You are a screenwriter starting a new project. You have been given the title '{title}' for a movie project and told that is in the {genre} genre. Please write a single paragraph outline for a potential story that would fit.", "Junior Screenwriter", title, genre, "")
+        return await self.generate_contribution("You are a talented screenwriter starting a new project. You have been given the title '{title}' for a movie project and told that is in the {genre} genre. Please write a single paragraph outline for a potential story that would fit.", "Junior Screenwriter", title, genre)
     
     async def critique_outline(self, title, genre, outline):
-        return await self.generate_contribution("You are an experienced screenwriter who has been handed a first draft outline for a movie project. Please give some constructive criticism that the screenwriter can use to improve and flesh out the outline. Movie Title: {title} Movie Genre: {genre} Outline: {outline}", "Senior Screenwriter", title, genre, outline)
+        return await self.generate_contribution("You are a very experienced and commercially successful screenwriter who has been handed a first draft outline for a movie project. Please give some constructive criticism that the screenwriter can use to improve and flesh out the outline. Movie Title: {title} Movie Genre: {genre} Outline: {outline}", "Senior Screenwriter", title, genre, outline=outline)
     
-    async def generate_contribution(self, prompt_text, name, title, genre, outline):
+    async def second_draft_outline(self, title, genre, outline, critique):
+        return await self.generate_contribution("You are a talented screenwriter working a new project. You have been given the title '{title}' for a movie project, told that is in the {genre} genre and you've generated a possible outline for the story, shown below. Your boss, an experienced screenwriter, has given you a critique below. Please rewrite the outline based on the suggestions in the critique.\n\n Your Outline:\n{outline}\n\n Your boss's critique:\n{critique}", "Junior Screenwriter", title, genre, outline=outline, critique=critique)
+    
+    async def generate_contribution(self, prompt_text, name, title, genre, outline="", critique=""):
         global Team_contribution_queue
         model = ChatOpenAI(model="gpt-4")
         prompt_template = ChatPromptTemplate.from_messages(
@@ -55,7 +65,7 @@ class MovieProject(Base):
         )    
         parser = StrOutputParser()
         chain = prompt_template | model | parser
-        result = chain.invoke({"title": title, "genre": genre, "outline": outline})
+        result = await chain.ainvoke({"title": title, "genre": genre, "outline": outline, "critique": critique})
         if team_contribution_queue.queue is None:
             raise("team_contribution_queue.queue is not initialized!")
         else:

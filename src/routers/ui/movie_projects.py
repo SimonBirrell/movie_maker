@@ -66,9 +66,10 @@ async def ui_post_movie_project(
 
 @router.get("/team_contributions")
 async def live_team_contributions():
+    queue = team_contribution_queue.queue
     print("Setting up live_team_contributions")
-    print("Team_contribution_queue", team_contribution_queue.queue)
-    if team_contribution_queue.queue is None:
+    print("Team_contribution_queue", queue)
+    if queue is None:
         raise HTTPException(status_code=500, detail="Team_contribution_queue is not initialized!")
 
     print("queue", team_contribution_queue.queue)
@@ -76,9 +77,9 @@ async def live_team_contributions():
         try:
             while True:
                 # await asyncio.sleep(1) # waits for a second
-                # payload = json.dumps({'movie_project_id': 2, 'name': "Jo Schmoe", 'contribution': "Critiqued the first draft outline"})
+                # payload = {'movie_project_id': 2, 'name': "Jo Schmoe", 'contribution': "Critiqued the first draft outline"}
                 print("Waiting for a team contribution...")
-                payload = await team_contribution_queue.queue.get() # receives an update from queue
+                payload = await queue.get() # receives an update from queue
                 print("Got a team contribution!", payload)
                 yield dict(data=json.dumps(payload), event="team-contribution") # sends it to the browser
         except asyncio.CancelledError as e:
