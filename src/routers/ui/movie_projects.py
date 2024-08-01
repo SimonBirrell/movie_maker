@@ -1,12 +1,16 @@
+import asyncio, json
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sse_starlette.sse import EventSourceResponse
 from typing import Annotated
 from sqlalchemy.orm import Session
 
 from ...schemas.movie_projects import MovieProjectBase, Genre
 from ...database import get_db
 from ... import crud
+from ...models import team_contribution_queue
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -60,21 +64,26 @@ async def ui_post_movie_project(
         request=request, name="movie_projects/show.html", context={"movie_project": movie_project}
     )
 
-@router.post("/ui/movie_projects/{movie_project_id}/generate_outline", response_class=RedirectResponse, tags=['UI'])
-async def ui_generate_outline_for_movie_project(                                
-                                request: Request, 
-                                movie_project_id: int, 
-                                background_tasks: BackgroundTasks,
-                                db: Session = Depends(get_db)
-                                ):
-    movie_project = crud.get_movie_project(db=db, movie_project_id=movie_project_id)
-    if movie_project is None:
-        raise HTTPException(status_code=404, detail=f"Movie Project ID={movie_project_id} not found")
-    movie_project.outline = "Generating outline... please refresh in a few seconds..."
-    db.commit()
-    db.refresh(movie_project)
-    background_tasks.add_task(movie_project.generate_outline, db)
-    return templates.TemplateResponse(
-        request=request, name="movie_projects/show.html", context={"movie_project": movie_project, "ok_message": "Outline generation started"}
-    )
+@router.get("/team_contributions")
+async def live_team_contributions():
+    print("Setting up live_team_contributions")
+    print("Team_contribution_queue", team_contribution_queue.queue)
+    if team_contribution_queue.queue is None:
+        raise HTTPException(status_code=500, detail="Team_contribution_queue is not initialized!")
 
+    print("queue", team_contribution_queue.queue)
+    async def generate_stream():
+        try:
+            while True:
+                # await asyncio.sleep(1) # waits for a second
+                # payload = json.dumps({'movie_project_id': 2, 'name': "Jo Schmoe", 'contribution': "Critiqued the first draft outline"})
+                print("Waiting for a team contribution...")
+                payload = await team_contribution_queue.queue.get() # receives an update from queue
+                print("Got a team contribution!", payload)
+                yield dict(data=json.dumps(payload), event="team-contribution") # sends it to the browser
+        except asyncio.CancelledError as e:
+            # when the browser disconects, cancels notifications
+            raise e
+
+    print("Returning stream...")
+    return EventSourceResponse(generate_stream())

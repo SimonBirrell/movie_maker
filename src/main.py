@@ -11,6 +11,10 @@ from .routers.api.movie_projects import router as api_movie_projects_router
 from .routers.ui.movie_projects import router as ui_movie_projects_router
 from . import crud
 
+#from .models.team_contribution_queue import startup as team_contribution_queue_startup
+#
+#team_contribution_queue_startup()
+
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -7,6 +7,37 @@
 
 {% block content %}
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("Adding listener...");
+        const source = new EventSource("http://localhost:8000/team_contributions");
+        const ul = document.querySelector("#team-contributions")
+        source.addEventListener('team-contribution', event => {
+            console.log("**** Event occurred");
+            console.log(event.data);
+            const teamContribution = JSON.parse(event.data);
+            console.log("Parsed");
+            if (teamContribution.movie_project_id === {{ movie_project.id }}) {
+                const li = document.createElement("li");
+                const p = document.createElement("p");
+                p.innerText = teamContribution.contribution;
+                li.innerHTML = "<span><strong>" + teamContribution.name + "</strong>: </span>";
+                li.appendChild(p);
+                ul.appendChild(li);
+            } else { 
+                console.log("Ignoring team contribution for another movie project.");
+                console.log(teamContribution.movie_project_id);
+            }
+
+        }, false);
+        source.addEventListener('error', event => {
+            console.log("Failed to connect to event stream.");
+            console.log(event);
+            return false;
+        }, false);
+    });
+</script>
+
 {% if ok_message %}
 <div style="background-color:green; color:white;padding:4px;">{{ ok_message }}</div>
 {% endif %}
@@ -14,13 +45,39 @@
 <h1>{{ movie_project.title }}</h1>
 <p>{{ movie_project.genre }}</p>
 <p>{{ movie_project.description }}</p>
-<p>{{ movie_project.outline }}</p>
+<p id="outline">{{ movie_project.outline }}</p>
+
+<h2>Team Contributions</h2>
+
+<ul id="team-contributions"></ul>
 
 <a href="/ui/movie_projects/{{ movie_project.id }}">Refresh</a>
 <a href="/ui/movie_projects/{{ movie_project.id }}/edit">Edit</a>
 
-<form action="/ui/movie_projects/{{ movie_project.id }}/generate_outline" method="post">
-    <input type="submit" value="Generate Outline">
+<form id="generate-outline-form" method="post">
+    <input type="submit" id="generate-outline-send" value="Generate Outline">
 </form>
+<script>
+    const send = document.querySelector("#generate-outline-send");
+
+    send.addEventListener("click", async (event) => {
+        console.log("Click!");
+        event.preventDefault();
+        // A <form> element
+        const userInfo = document.querySelector("#generate-outline-form");
+        const formData = new FormData(userInfo);
+
+        const outline = document.querySelector("#outline");
+        outline.innerText = "Generating outline...";
+
+        const response = await fetch("/movie_projects/{{ movie_project.id }}/generate_outline", {
+            method: "POST",
+            body: formData,
+        });
+        console.log(response);
+        console.log(await response.json());
+        return true;
+    });
+</script>
 
 {% endblock %}
