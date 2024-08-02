@@ -9,6 +9,7 @@ from .database import get_db
 from .schemas.movie_projects import MovieProjectRead
 from .routers.api.movie_projects import router as api_movie_projects_router
 from .routers.ui.movie_projects import router as ui_movie_projects_router
+from .routers.ui.cast_members import router as ui_cast_members_router
 from . import crud
 
 #from .models.team_contribution_queue import startup as team_contribution_queue_startup
@@ -34,3 +35,4 @@ async def ui_root(request: Request, db: Session = Depends(get_db)) -> str:
 
 app.include_router(api_movie_projects_router)
 app.include_router(ui_movie_projects_router)
+app.include_router(ui_cast_members_router)

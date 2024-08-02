@@ -29,3 +29,4 @@ class MovieProject(MovieProjectBase):
 
     class Config:
         orm_mode = True
+

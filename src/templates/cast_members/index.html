@@ -1,0 +1,17 @@
+{% extends 'layouts/application.html' %}
+{% block title %}Cast Members{% endblock %}
+
+{% block breadcrumb %}
+    <a href="/ui">Movie Maker</a> &gt; Cast Members</a>
+{% endblock %}
+
+{% block content %}
+
+<button><a href="{{ url_for('ui_new_cast_member') }}" style="color:white;">New Cast Member</a></button>
+
+{% for cast_member in cast_members %}
+<h2><a href="{{ url_for('ui_read_cast_member', cast_member_id=cast_member.id)}}">{{ cast_member.actor_name }}</a></h2>
+<p><a href="/ui/cast_members/{{ cast_member.id }}">{{ cast_member.character_name }}</a>{% if cast_member.actor_name %}({{ cast_member.actor_name }}){% endif %}</p>
+{% endfor %}
+
+{% endblock %}

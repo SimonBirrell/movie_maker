@@ -1,0 +1,26 @@
+{% extends 'layouts/application.html' %}
+{% block title %}Edit {{ cast_member.title }}{% endblock %}
+
+{% block content %}
+
+<form action="/ui/cast_members/{{ cast_member.id }}" method="post">
+    <label for="character_name">Character Name*
+        <input type="text" id="character_name" name="character_name" value="{{ cast_member.character_name }}">
+    </label>  
+    <label for="movie_project_id">Movie Project
+        <select name="movie_project_id" id="movie_project_id">
+            {% for movie_project in movie_projects %}
+                <option value="{{ movie_project.id }}" {% if movie_project.id == cast_member.movie_project_id %}selected{% endif %}>{{ movie_project.title }}</option>
+            {% endfor %}
+        </select>
+    </label>  
+    <label for="actor_name">Actor Name
+        <input type="text" id="actor_name" name="actor_name" value="{{ cast_member.actor_name }}">
+    </label>   
+    <label for="justification_for_actor">Notes on Casting Choice
+        <input type="textarea" id="justification_for_actor" name="justification_for_actor" value="{{ cast_member.justification_for_actor }}">
+    </label>    
+    <button>Save</button>
+</form>
+
+{% endblock %}

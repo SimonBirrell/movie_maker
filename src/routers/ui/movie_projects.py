@@ -26,10 +26,13 @@ async def ui_root(request: Request, db: Session = Depends(get_db)) -> str:
 @router.get("/ui/movie_projects/{movie_project_id}", response_class=HTMLResponse, tags=['UI'])
 async def ui_read_movie_project(request: Request, movie_project_id: int, db: Session = Depends(get_db)):
     movie_project = crud.get_movie_project(db=db, movie_project_id=movie_project_id)
+    cast_members = crud.get_cast_members_on_movie_project(db=db, movie_project_id=movie_project_id)
     if movie_project is None:
         raise HTTPException(status_code=404, detail=f"Movie Project ID={movie_project_id} not found")
     return templates.TemplateResponse(
-        request=request, name="movie_projects/show.html", context={"movie_project": movie_project}
+        request=request, name="movie_projects/show.html", context={
+            "movie_project": movie_project,
+            "cast_members": cast_members}
     )
 
 @router.get("/ui/movie_projects/{movie_project_id}/edit", response_class=HTMLResponse, tags=['UI'])
